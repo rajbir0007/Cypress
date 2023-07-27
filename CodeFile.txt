@@ -1,0 +1,35 @@
+const convert = require('xml-js');
+const fs = require('fs');
+const path = require("path");
+
+const folderPath = "./results";
+
+// read all files in the directory
+let filesArr = fs.readdirSync(folderPath);
+
+// Loop through array and rename all files
+filesArr.forEach((file, index) => {
+  let fullPath = path.join(folderPath, file);
+  let fileExtension = path.extname(file);
+  let fileName = path.basename(file, fileExtension);
+
+  const xmlFile = fs.readFileSync(fullPath, 'utf8');
+
+  // parse xml file as a json object
+  const jsonData = JSON.parse(convert.xml2json(xmlFile, { compact: true, spaces: 2 }));
+  // xml files will contain the spec file name, Hence it can be extracted from there.
+  const targetNode = jsonData.testsuites.testsuite.find(x => x._attributes.name === [Unique-identifier]);
+
+  // Extract new file name from targetNode
+  // Used Regex to extract only the filename. 
+  const extractedFileName = targetNode._attributes.file.match([REGEX])[1];
+  const newFileName = extractedFileName + fileExtension;
+ try {
+    fs.renameSync(fullPath, path.join(folderPath, newFileName));
+  } catch (error) {
+    console.error(error);
+  }
+});
+
+// Link to my medium article
+// https://medium.com/@rajbir0007/renaming-cypress-reporter-result-files-according-to-their-corresponding-spec-js-file-name-2f60fd0b31f6
